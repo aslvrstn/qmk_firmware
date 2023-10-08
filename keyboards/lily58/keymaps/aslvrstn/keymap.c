@@ -159,6 +159,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       return true;
       break;
+    case KC_BSPC:
+      if (get_mods() & MOD_BIT(KC_LSFT)) {
+        if (record->event.pressed) {
+          register_code(KC_DEL);
+        } else {
+          unregister_code(KC_DEL);
+        }
+        return false;
+      }
+      return true;
   }
   return true;
 }
