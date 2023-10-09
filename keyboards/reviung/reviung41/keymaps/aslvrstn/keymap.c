@@ -28,12 +28,14 @@ enum layer_names {
 #define RAISBK LT(_RAISE, KC_BSPC)
 #define ADJUST MO(_ADJUST)
 
+#define TABSFT MT(MOD_LSFT, KC_TAB)
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_BASE] = LAYOUT(
-    KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,      KC_T,               KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_BSPC,
-    KC_LSFT,  KC_A,     KC_S,     KC_D,     KC_F,      KC_G,               KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,
+    KC_ESC,   KC_Q,     KC_W,     KC_E,     KC_R,      KC_T,               KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_BSPC,
+    TABSFT,   KC_A,     KC_S,     KC_D,     KC_F,      KC_G,               KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,
     KC_LCTL,  KC_Z,     KC_X,     KC_C,     KC_V,      KC_B,               KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  RSFT_T(KC_ENT),
-                                            KC_LALT,   LOWENT,   KC_SPC,   RAISBK,   KC_RGUI
+                                            KC_LGUI,   LOWENT,   KC_SPC,   RAISBK,   KC_RALT
   ),
   
   [_LOWER] = LAYOUT(
@@ -62,3 +64,37 @@ layer_state_t layer_state_set_user(layer_state_t state) {
   return update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
 }
 
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  if (record->event.pressed) {
+#ifdef OLED_ENABLE
+    set_keylog(keycode, record);
+#endif
+    // set_timelog();
+  }
+
+  // https://www.reddit.com/r/olkb/comments/njb4o9/esc_key_with_backtick_on_layer_and_tilde_on/gz6mo8i/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+  switch (keycode) {
+    case KC_ESC:
+      if (get_mods() & MOD_BIT(KC_LGUI)) {
+        if (record->event.pressed) {
+          register_code(KC_GRV);
+        } else {
+          unregister_code(KC_GRV);
+        }
+        return false;
+      }
+      return true;
+      break;
+    case KC_BSPC:
+      if (get_mods() & MOD_BIT(KC_LSFT)) {
+        if (record->event.pressed) {
+          register_code(KC_DEL);
+        } else {
+          unregister_code(KC_DEL);
+        }
+        return false;
+      }
+      return true;
+  }
+  return true;
+}
